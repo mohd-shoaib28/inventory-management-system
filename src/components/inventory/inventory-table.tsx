@@ -1,13 +1,14 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useState } from "react";
-import { Filter, RefreshCw } from "lucide-react";
+import { Filter, RefreshCw, Settings2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import type { Inventory, Product, Location } from "@/lib/types";
+import { StockAdjustmentModal } from "./stock-adjustment-modal";
 
 interface InventoryTableProps {
   initialSearch?: string;
@@ -22,6 +23,7 @@ export function InventoryTable({ initialSearch = "" }: InventoryTableProps) {
   const [locationId, setLocationId] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [allLocations, setAllLocations] = useState<Location[]>([]);
+  const [adjustingInventory, setAdjustingInventory] = useState<Inventory | null>(null);
 
   const fetchInventory = useCallback(async () => {
     setLoading(true);
@@ -88,6 +90,17 @@ export function InventoryTable({ initialSearch = "" }: InventoryTableProps) {
 
   return (
     <div className="space-y-4">
+      {adjustingInventory && (
+        <StockAdjustmentModal
+          inventory={adjustingInventory}
+          onClose={() => setAdjustingInventory(null)}
+          onSave={() => {
+            setAdjustingInventory(null);
+            fetchInventory();
+          }}
+        />
+      )}
+
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-3">
@@ -206,12 +219,19 @@ export function InventoryTable({ initialSearch = "" }: InventoryTableProps) {
                                         available ({inv.qty_allocated} allocated)
                                       </span>
                                     </div>
-                                    <Badge
-                                      variant={inv.qty_on_hand === 0 ? "destructive" : "secondary"}
-                                      className="mt-1"
-                                    >
-                                      {getStatusLabel(inv.qty_on_hand, inv.reorder_point)}
-                                    </Badge>
+                                    <div className="mt-2 flex items-center gap-2">
+                                      <Badge
+                                        variant={inv.qty_on_hand === 0 ? "destructive" : "secondary"}
+                                      >
+                                        {getStatusLabel(inv.qty_on_hand, inv.reorder_point)}
+                                      </Badge>
+                                      <button
+                                        onClick={() => setAdjustingInventory(inv)}
+                                        className="ml-auto text-[10px] text-slate-400 hover:text-slate-200"
+                                      >
+                                        <Settings2 className="h-3.5 w-3.5" />
+                                      </button>
+                                    </div>
                                   </div>
                                 );
                               })}

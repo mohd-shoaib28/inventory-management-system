@@ -94,3 +94,29 @@ export interface StockAdjustment {
   reason: string;
   initiated_by: string;
 }
+
+export interface ReplenishmentPrediction {
+  productId: string;
+  productName: string;
+  sku: string;
+  locationId: string;
+  locationName: string;
+  currentStock: number;
+  dailyVelocity: number;
+  daysUntilStockout: number;
+  recommendedOrderQty: number;
+  urgency: "low" | "medium" | "high" | "critical";
+  estimatedCost: number;
+}
+
+export interface ShrinkageReport {
+  productId: string;
+  productName: string;
+  locationId: string;
+  locationName: string;
+  expectedQty: number;
+  actualQty: number;
+  variance: number;
+  variancePercent: number;
+  estimatedLoss: number;
+}
